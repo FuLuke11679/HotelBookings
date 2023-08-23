@@ -1,0 +1,87 @@
+```{r}
+#|label: load-data 
+library(tidyverse)
+library(ggplot2)
+install.packages("tidymodels")
+library(tidymodels)
+hotels <- "hotel_bookings.csv"
+```
+
+```{r}
+hotels |>
+filter(adr != 5400) |>
+  mutate(arrival_date_month = factor(arrival_date_month, levels = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"))) |>
+  ggplot(aes(x = arrival_date_month, y = adr, fill = arrival_date_month)) +
+  geom_boxplot() +
+  labs(title = 'How Arrival Date Affects Average Daily Rate In Hotels', 
+        x = "Month Of The Year", y = "Average Daily Rate ($)", fill = "Month") +
+  theme(axis.text.x = element_text(size = 6))
+```
+```{r}
+hotels |>
+filter(adr != 5400) |>
+  mutate(arrival_date_month = factor(arrival_date_month, levels = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")), canceled = if_else(is_canceled == 0, FALSE, TRUE)) |>
+  ggplot(aes(x = arrival_date_month, fill = canceled)) +
+  labs(title = "Proportion of Cancels By Month", x = "Month of Arrival Date", y = "Proportion", fill = "Canceled") + 
+  geom_bar(position = "fill") +
+   theme(axis.text.x = element_text(size = 6))
+```
+```{r}
+#| label: Length of stay
+hotels |>
+  mutate(arrival_date_month = factor(arrival_date_month, levels = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"))) |>
+  ggplot(aes(x = arrival_date_month, y = (stays_in_weekend_nights + stays_in_week_nights), fill = arrival_date_month)) +
+  geom_boxplot() +
+  labs(title = 'How Arrival Date Month Affects Duration of Stay in Hotels', 
+        x = "Month Of The Year", y = "Duration of Stay (Days)", fill = "Month") +
+  theme(axis.text.x = element_text(size = 6))
+```
+
+
+
+```{r}
+#| label: Graph by 
+hotels |>
+mutate(arrival_date_month = factor(arrival_date_month, levels = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")), canceled = if_else(is_canceled == 0, FALSE, TRUE)) |>
+  ggplot(aes(x = arrival_date_month, fill = canceled)) +
+  geom_bar() +
+  labs(x = "Month of Arrival Date", y = "Count", title = "Distribution of Hotel Bookings by Month", fill = "Canceled")+
+  theme(axis.text.x = element_text(size = 7))
+```
+
+```{r}
+
+child <- hotels |>
+mutate(single_adults = if_else(babies > 0 | children >0, TRUE, FALSE)) 
+count(child, single_adults)
+ggplot(child, aes(x = ) )
+```
+
+```{r}
+Mealplan <- hotels |>
+  filter(adr != 5400) |>
+mutate(hasMeal = if_else(meal == "BB" | meal == "HB", TRUE, FALSE)) 
+Mealplan |>
+ggplot(aes(x = hasMeal, y = adr, fill = hasMeal)) +
+  geom_boxplot() +
+  labs(x = "Bought Meal Plan", y = "Average Daily Rate ($)", title = "Distribution of Average Daily Rate by Meal Plan", fill = "Bought Meal Plan")
+
+Mealplan |>
+  count(hasMeal)
+```
+```{r}
+linear_reg() |>
+  set_engine("lm") |>
+  fit(adr ~ hasMeal, data = Mealplan) |>
+  tidy()
+```
+```{r}
+Mealplan <- hotels |>
+mutate(hasMeal = if_else(meal == "BB" | meal == "HB", TRUE, FALSE)) 
+Mealplan |>
+ggplot(aes(x = hasMeal, fill = hasMeal)) +
+  geom_bar() +
+  labs(x = "Bought Meal Plan", y = "Number of Hotel Hookings With Meal Plan", title = "Distribution of Customers With and Without Meal Plan", fill = "Bought Meal Plan")
+
+```
+
